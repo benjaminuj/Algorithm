@@ -8,7 +8,6 @@ class Solution {
             babbling[i] = babbling[i].replaceAll("ma", "--");
         }
         for(int i=0; i<babbling.length; i++) {
-            System.out.println(babbling[i]);
             if(babbling[i].matches(".*[a-zA-Z].*")) answer++;
         }
         answer = babbling.length - answer;
