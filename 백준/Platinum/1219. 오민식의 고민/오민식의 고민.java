@@ -43,7 +43,7 @@ public class Main {
 	}
 	
 	public static void bellanFord(int v) {
-		for(int i=1; i<=N+50; i++) {
+		for(int i=1; i<=2*N; i++) {
 			for(int j=0; j<list.size(); j++) {
 				int start = list.get(j).start;
 				int end = list.get(j).end;
