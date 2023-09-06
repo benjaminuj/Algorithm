@@ -6,29 +6,35 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int N = Integer.parseInt(br.readLine());
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		StringBuilder sb = new StringBuilder();
 		
+		int N = Integer.parseInt(st.nextToken());
+	
 		for(int i=0; i<N; i++) {
-			String cmd = br.readLine();
+			st = new StringTokenizer(br.readLine());
+			String cmd = st.nextToken();
 			
 			switch(cmd) {
 				case "pop" :
-					System.out.println(pop());
+					sb.append(pop()).append("\n");
 					break;
 				case "empty" :
-					System.out.println(empty());
+					sb.append(empty()).append("\n");
 					break;
 				case "top" :
-					System.out.println(top());
+					sb.append(top()).append("\n");
 					break;
 				case "size" :
-					System.out.println(list.size());
+					sb.append(list.size()).append("\n");
 					break;
-				default:
-					String[] tempOfPush = cmd.split(" ");
-					list.add(Integer.parseInt(tempOfPush[1]));
+				case "push" :
+					list.add(Integer.parseInt(st.nextToken()));
+					break;
 			}
 		}
+		
+		System.out.print(sb);
 	}
 	
 	public static void push(int i) {
@@ -50,9 +56,5 @@ public class Main {
 	public static int top() {
 		if(list.size()>0) return list.get(list.size()-1);
 		return -1;
-	}
-		
-
+	}	
 }
-
-
