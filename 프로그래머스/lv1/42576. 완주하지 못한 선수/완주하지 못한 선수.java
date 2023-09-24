@@ -14,11 +14,11 @@ class Solution {
             count.put(completion[i], count.get(completion[i])-1);
         }
          
-        count.values().removeIf(sum -> sum==0);
-        
-        Iterator<String> iter = count.keySet().iterator();
-        answer = iter.next();
-    
+        for(String key : count.keySet()) {
+            if(count.get(key) == 1) {
+                answer = key;
+            }
+        }
         return answer;
     }
 }
