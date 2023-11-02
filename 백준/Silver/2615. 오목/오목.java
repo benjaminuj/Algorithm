@@ -3,24 +3,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-//만약 5목이 완성되었다면 6목이있는지 확인하고,
-//만약 해당 조건도 완성되었다면, 5목의 입장에서 반대방향의 오목 한칸이 존재하는지 확인해야함
-
 public class Main {
-	
-	public static int N;
 	public static int[][] map = new int[19][19];
-	public static boolean[][] visited = new boolean[19][19];
-//	(0,0)부터 탐색하니, 우상대각, 오른쪽, 우하대각, 아래쪽  4가지에, 좌하대각, 왼쪽, 좌상대각, 위쪽, 
-//	이렇게 설계한 이유는,  연속된 다섯 개의 바둑알 중에서 가장 왼쪽에 있는 바둑알 이라는 조건과 세로측에서는 맨 위의 바둑알이라는 조건을 고려
 	public static int[] dx = {-1, 0, 1, 1, 1, 0, -1, -1};
 	public static int[] dy = {1, 1, 1, 0, -1, -1, -1, 0};
 	public static int result = 0;
 	public static boolean flag = false; //6목인지 확인하기 위한 flag
     public static void main(String[] args) throws IOException{
     	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    	
-    	
+    
     	for(int i=0;i<19;i++) {
     		StringTokenizer st = new StringTokenizer(br.readLine());	
     		for(int j=0;j<19;j++) {
@@ -101,13 +92,9 @@ public class Main {
 		int color = start.color;
 		if(nr < 0 || nr >= 19 || nc < 0 || nc >= 19) return ;
 		if(map[nr][nc] != color) return ;
-		if(visited[nr][nc] == true) return ;
 		
-		visited[nr][nc] = true;
 		simulate(new Node(nr, nc, color), level + 1, dir);
-		if(flag == false) {
-			visited[nr][nc] = false;
-		}
+
 		
     }
 
