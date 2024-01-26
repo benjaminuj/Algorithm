@@ -73,7 +73,7 @@ public class Main {
 							
 							if (passenger == null) {
 								passenger = newPassenger;
-								usage += cur.dist+1;
+								usage = cur.dist+1;
 							} else if (newPassenger.from.compareTo(passenger.from) < 0 && usage >= cur.dist + 1) { // == 이 아니라 >= 아닌가?
 								passenger = newPassenger;
 							}
