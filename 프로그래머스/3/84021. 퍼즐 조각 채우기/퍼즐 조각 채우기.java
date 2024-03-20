@@ -5,12 +5,13 @@ class Solution {
     List<List<Point>> g = new ArrayList<>();
     int[] dx = {0, 0, 1, -1};
     int[] dy = {1, -1, 0, 0};
+    int len;
     
     public int solution(int[][] game_board, int[][] table) {
         int answer = 0;
         //규칙에 맞게 최대한 많은 퍼즐 조각을 채워 넣을 경우, 총 몇 칸을 채울 수 있는지 return 
         
-        int len = game_board.length;
+        len = game_board.length;
         
         //game_board 0, 1 바꿔주기
         for(int i=0; i<len; i++){
@@ -101,7 +102,7 @@ class Solution {
                 for(int j=0; j<table.size(); j++){
                     int temp = table.get(j).x;
                     table.get(j).x = table.get(j).y;
-                    table.get(j).y = -temp;
+                    table.get(j).y = len-1-temp;
                 }
             }         
         }
