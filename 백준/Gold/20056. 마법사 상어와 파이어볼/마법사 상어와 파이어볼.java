@@ -48,29 +48,10 @@ public class Main {
 		// 이동 
 		// ?? 이동한거 새로 만든 자료구조에 옮기는ㄱ ㅔ좋을까? 아니면 업데이트할까? 
 		for (Point p : map.keySet()) {
-			int x = p.x;
-			int y = p.y;
-			
 			for (Info i : map.get(p)) {
-				int nx = x;
-				int ny = y;
-				
-				// 이동 수행
-				for (int k =0; k < i.s%N; k++) {
-					nx += dr[i.d][0];
-					ny += dr[i.d][1];
-					
-					nx = nx % N;
-					ny = ny % N;
-					
-					if (nx < 0) {
-						nx = N + nx; 
-					} 
-					
-					if (ny < 0) {
-						ny = N + ny;
-					}
-				}
+				 int distance = i.s % N; // 실제 이동 거리
+		         int nx = (p.x + dr[i.d][0] * distance + N) % N; // 새로운 x 좌표
+		         int ny = (p.y + dr[i.d][1] * distance + N) % N; // 새로운 y 좌표
 				
 				Point nP = new Point(nx, ny);
 				moved.putIfAbsent(nP, new ArrayList<>());
