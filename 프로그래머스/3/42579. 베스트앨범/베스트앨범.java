@@ -49,7 +49,7 @@ class Solution {
                 return this.idx - o.idx;
             }
             
-            return o.cnt - this.cnt; // 내림차순아닌가?
+            return o.cnt - this.cnt;
         }
     }
 }
