@@ -1,54 +1,51 @@
-import java.util.Scanner;
-import java.util.HashMap;
- 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(bufferedReader.readLine());
+        List<String> stringList = new ArrayList<>();
         
-        int N = sc.nextInt();
-        
-        HashMap<String, Integer> wordIndex = new HashMap<>();
-        String[] words = new String[N];
-        
-        for (int i = 0; i < N; i++) {
-            String word = sc.next();
-            wordIndex.put(word, i);
-            words[i] = word;
+        for (int i = 0; i < n; i++) {
+            String inputString = bufferedReader.readLine();
+            if (!stringList.contains(inputString)) {
+                stringList.add(inputString);
+            }
         }
+
+        int resultIndex1 = 0;
+        int resultIndex2 = 0;
+        int maxCount = 0;
         
-        String S = "";
-        String T = "";
-        int maxPrefixLength = 0;
-        
-        for (int i = 0; i < N; i++) {
-            String currentWord = words[i];
-            for (int j = i + 1; j < N; j++) {
-                String nextWord = words[j];
-                int prefixLength = getPrefixLength(currentWord, nextWord);
-                // 최대 접두사 길이 갱신 시 S와 T 업데이트
-                if (prefixLength > maxPrefixLength) {
-                    maxPrefixLength = prefixLength;
-                    S = currentWord;
-                    T = nextWord;
+        for (int i = 0; i < n; i++) {
+            String str1 = stringList.get(i);
+            
+            for (int j = i + 1; j < n; j++) {
+                int count = 0;
+                String str2 = stringList.get(j);
+                int size = Math.min(str1.length(), str2.length());
+                
+                for (int z = 0; z < size; z++) {
+                    if (str1.charAt(z) == str2.charAt(z)) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                if (count > maxCount) {
+                    resultIndex1 = i;
+                    resultIndex2 = j;
+                    maxCount = count;
                 }
             }
         }
 
-        System.out.println(S);
-        System.out.println(T);
-    }
-    
-    private static int getPrefixLength(String word1, String word2) {
-        int length = Math.min(word1.length(), word2.length());
-        int prefixLength = 0;
-
-        for (int i = 0; i < length; i++) {
-            if (word1.charAt(i) == word2.charAt(i)) {
-                prefixLength++;
-            } else {
-                break;
-            }
-        }
-        return prefixLength;
+        System.out.println(stringList.get(resultIndex1));
+        System.out.println(stringList.get(resultIndex2));
     }
 }
