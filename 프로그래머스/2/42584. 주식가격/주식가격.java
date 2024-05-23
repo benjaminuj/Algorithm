@@ -3,34 +3,33 @@ import java.util.*;
 class Solution {
     public int[] solution(int[] prices) {
         int[] answer = new int[prices.length];
-        int len = prices.length-1;
         
         Deque<Info> stack = new ArrayDeque<>();
-        for (int i = 0; i <= len; i++) {
-            while (!stack.isEmpty() && stack.peek().cost > prices[i]) {
-                answer[stack.peek().idx] = i - stack.peek().idx;
-                stack.pop();
+        for (int i = 0; i < prices.length; i++) {
+            while (!stack.isEmpty() && stack.peekLast().price > prices[i]) {
+                Info now = stack.removeLast();
+                
+                answer[now.idx] = i - now.idx;
             }
             
-            stack.push(new Info(prices[i], i));
+            stack.add(new Info(i, prices[i]));
         }
-        
         
         while (!stack.isEmpty()) {
-            answer[stack.peek().idx] = len - stack.peek().idx;
-            stack.pop();
+            Info now = stack.removeLast();
+            answer[now.idx] = answer.length-1 - now.idx;
         }
-
+      
         return answer;
     }
     
     class Info {
-        int cost;
         int idx;
+        int price;
         
-        public Info(int cost, int idx) {
-            this.cost = cost;
+        public Info (int idx, int price) {
             this.idx = idx;
+            this.price = price;
         }
     }
 }
