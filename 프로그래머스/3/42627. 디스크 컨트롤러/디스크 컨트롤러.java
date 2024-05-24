@@ -3,64 +3,29 @@ import java.util.*;
 class Solution {
     public int solution(int[][] jobs) {
         Arrays.sort(jobs, (j1, j2) -> j1[0] - j2[0]);
-        int answer = 0;
+        Queue<int[]> pq = new PriorityQueue<>((j1, j2) -> j1[1] - j2[1]); // 큐 타입을 배열로 선언해서
+        
         int idx = 0;
-        Queue<Job> jobsQ = new PriorityQueue<>();
-        
-        int now = jobs[idx][0];
-        
-        // 시작시간이 같은게 여러개일 경우
-        while (idx < jobs.length && jobs[idx][0] == now) {
-            jobsQ.add(new Job(jobs[idx][0], jobs[idx][1]));
-            idx++;
-        }
-        idx--;
-        
         int sum = 0;
         int endTime = 0;
+        int completedJobs = 0;
         
-        while (!jobsQ.isEmpty()) {
-            Job cur = jobsQ.poll();
-            System.out.println(cur.req + "," + idx);
-            // 대기 o
-            if (cur.req < endTime) {
-                endTime += cur.runTime;
-            } else { // 대기 x 
-                endTime = cur.req + cur.runTime;
-            }
-            
-            sum += endTime - cur.req;
-            
-            // System.out.println(endTime);
-            
-            // 추가할 프로세스 있는 경우
-            while (idx + 1 < jobs.length && jobs[idx+1][0] <= endTime) {
+        while (completedJobs < jobs.length) {
+            while(idx < jobs.length && jobs[idx][0] <= endTime) {
+                pq.add(jobs[idx]); // 배열 통채로 추가하는 방법.
                 idx++;
-                jobsQ.add(new Job(jobs[idx][0], jobs[idx][1]));
             }
             
-            if (idx +1 < jobs.length && jobsQ.isEmpty()) {
-                idx++;
-                jobsQ.add(new Job(jobs[idx][0], jobs[idx][1]));
+            if (!pq.isEmpty()) {
+                int[] job = pq.remove();
+                endTime += job[1]; // 연속적으로 처리하는 거라 이렇게해도 시간 업데이트 됨
+                sum += endTime - job[0];
+                completedJobs++;
+            } else {
+                endTime = jobs[idx][0];
             }
+
         }
-        answer = sum / jobs.length;
-        
-        return answer;
-    }
-    
-    class Job implements Comparable<Job> {
-        int req;
-        int runTime;
-        
-        public Job(int req, int runTime) {
-            this.req = req;
-            this.runTime = runTime;
-        }
-        
-        @Override
-        public int compareTo(Job o) {
-            return this.runTime - o.runTime;
-        }
+        return sum / jobs.length;
     }
 }
