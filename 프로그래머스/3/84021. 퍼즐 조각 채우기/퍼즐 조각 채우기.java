@@ -1,158 +1,195 @@
 import java.util.*;
 
 class Solution {
-    List<List<Point>> t = new ArrayList<>();
-    List<List<Point>> g = new ArrayList<>();
-    int[] dx = {0, 0, 1, -1};
-    int[] dy = {1, -1, 0, 0};
-    int len;
-    
+    private static int[] dy = {-1, 0, 1, 0};
+    private static int[] dx = {0, 1, 0, -1};
+
+    private static Queue<Pos> q = new LinkedList<>();
+
     public int solution(int[][] game_board, int[][] table) {
-        int answer = 0;
-        //규칙에 맞게 최대한 많은 퍼즐 조각을 채워 넣을 경우, 총 몇 칸을 채울 수 있는지 return 
-        
-        len = game_board.length;
-        
-        //game_board 0, 1 바꿔주기
-        for(int i=0; i<len; i++){
-            for(int j=0; j<len; j++){
-                if(game_board[i][j]==1){
-                    game_board[i][j] = 0;
-                }
-                else game_board[i][j] = 1;
+        var answer = 0;
+        var len = game_board.length;
+        var gameBoardBlockNum = BFS(len, game_board, 0);
+        var tableBlockNum = BFS(len, table, 1);
+
+        var gameBoardBlockUsed = new int[gameBoardBlockNum];
+        var gameBoardBlockCount = new int[gameBoardBlockNum];
+        var tableBlockUsed = new int[tableBlockNum];
+        var tableBlockCount = new int[tableBlockNum];
+
+        var tables = new int[4][len][len];
+        tables[0] = table;
+        for (int i = 0; i < 3; i++) {
+            tables[i + 1] = rotate(tables[i]);
+        }
+
+        for (int y = 0; y < len; y++) {
+            for (int x = 0; x < len; x++) {
+                gameBoardBlockCount[game_board[y][x]]++;
+                tableBlockCount[tables[0][y][x]]++;
             }
         }
-        
-        boolean[][] visited_t = new boolean[len][len];
-        boolean[][] visited_g = new boolean[len][len];
-        
-        for(int i=0; i<len; i++){
-            for(int j=0; j<len; j++){
-                //table에서 블록 추출
-                if(table[i][j]==1 && !visited_t[i][j])
-                    bfs(i, j, table, visited_t, t);
-                    
-                //game_board에서 빈공간 추출
-                if(game_board[i][j]==1 && !visited_g[i][j])
-                    bfs(i, j, game_board, visited_g, g);
-            }
-        }
-        
-        //table의 블록과 board 빈 공간의 블록을 회전하면서 비교해주기
-        answer = compareBlock(t, g, answer);
-        
-        return answer;
-    }
-    
-    public int compareBlock(List<List<Point>> table, List<List<Point>> board, int answer){
-        int table_size = table.size();
-        int board_size = board.size();
-        
-        boolean[] visited = new boolean[board_size];
-        
-        for(int i=0; i<table_size; i++){
-            for(int j=0; j<board_size; j++){
-                //일치하면
-                if(visited[j] || table.get(i).size()!=board.get(j).size())
+
+        for (int y = 0; y < len; y++) {
+            for (int x = 0; x < len; x++) {
+                if (game_board[y][x] < 2 || gameBoardBlockUsed[game_board[y][x]] == 1) {
                     continue;
-                if(isRotate(table.get(i), board.get(j))){
-                    visited[j] = true; //블록으로 채워짐 
-                    answer += board.get(j).size();
-                    break;   
                 }
-               
+
+                var count = gameBoardBlockCount[game_board[y][x]];
+                if (fill(y, x, game_board, count, tables[0], tableBlockCount, tableBlockUsed)
+                        || fill(y, x, game_board, count, tables[1], tableBlockCount, tableBlockUsed)
+                        || fill(y, x, game_board, count, tables[2], tableBlockCount, tableBlockUsed)
+                        || fill(y, x, game_board, count, tables[3], tableBlockCount, tableBlockUsed)) {
+
+                    gameBoardBlockUsed[game_board[y][x]] = 1;
+                    System.out.println(count);
+                    answer += count;
+                }
             }
         }
-        
+
         return answer;
     }
-    
-    public boolean isRotate(List<Point> table, List<Point> board){
-        //오름차순 정렬
-        Collections.sort(board);
-        
-        //90도씩 회전시켜보기. 0, 90, 180, 270
-        for(int i=0; i<4; i++){
-            //오름차순 정렬. table은 회전할때마다 다시 정렬해줌.
-            Collections.sort(table);
-            
-            int curr_x = table.get(0).x;
-            int curr_y = table.get(0).y;
-            
-            //회전하면서 좌표가 바뀌기 때문에, 다시 (0,0) 기준으로 세팅
-            for(int j=0; j<table.size(); j++){
-                table.get(j).x -= curr_x;
-                table.get(j).y -= curr_y;
-            }
-            
-            boolean check = true;
-            //좌표 비교
-            for(int j=0; j<board.size(); j++){
-                if(board.get(j).x != table.get(j).x || board.get(j).y != table.get(j).y){
-                    check = false;
-                    break;
+
+    private int BFS(int len, int[][] map, int ground) {
+        q.clear();
+        var blockNum = 2;
+        var visited = new int[len][len];
+
+        for (int y = 0; y < len; y++) {
+            for (int x = 0; x < len; x++) {
+                if (map[y][x] != ground) {
+                    continue;
                 }
-            }
-            
-            if(check){
-                return true;
-            }
-            else{
-               //90도 회전시키기. x, y -> y, -x
-                for(int j=0; j<table.size(); j++){
-                    int temp = table.get(j).x;
-                    table.get(j).x = table.get(j).y;
-                    table.get(j).y = len-1-temp;
+
+                q.add(new Pos(y, x));
+                map[y][x] = blockNum;
+                visited[y][x] = 1;
+
+                while (!q.isEmpty()) {
+                    var pos = q.poll();
+
+                    for (int i = 0; i < 4; i++) {
+                        var ny = pos.y + dy[i];
+                        var nx = pos.x + dx[i];
+
+                        if (ny < 0 || ny >= len || nx < 0 || nx >= len) {
+                            continue;
+                        }
+
+                        if (map[ny][nx] != ground) {
+                            continue;
+                        }
+
+                        if (visited[ny][nx] == 1) {
+                            continue;
+                        }
+
+                        map[ny][nx] = blockNum;
+                        visited[ny][nx] = 1;
+                        q.add(new Pos(ny, nx));
+                    }
                 }
-            }         
+                blockNum++;
+            }
         }
-        
+
+        return blockNum;
+    }
+
+    private int[][] rotate(int[][] source) {
+        var q = new LinkedList<Integer>();
+        var target = new int[source.length][source.length];
+
+        for (int y = 0; y < source.length; y++) {
+            for (int x = 0; x < source.length; x++) {
+                q.add(source[y][x]);
+            }
+        }
+
+        for (int x = source.length - 1; x >= 0; x--) {
+            for (int y = 0; y < source.length; y++) {
+                target[y][x] = q.poll();
+            }
+        }
+
+        return target;
+    }
+
+    private boolean fill(int mapY, int mapX, int[][] map, int count, int[][] table, int[] tableBlockCounts, int[] tableBlockUsed) {
+        var visited = new int[table.length][table.length];
+
+        for (int y = 0; y < table.length; y++) {
+            for (int x = 0; x < table.length; x++) {
+                if (table[y][x] == 0) {
+                    continue;
+                }
+
+                if (tableBlockUsed[table[y][x]] == 1) {
+                    continue;
+                }
+
+                if (count != tableBlockCounts[table[y][x]]) {
+                    continue;
+                }
+
+                q.clear();
+                q.add(new Pos(y, x));
+                visited[y][x] = 1;
+
+                var tableBlockCount = 1;
+
+                while (!q.isEmpty()) {
+                    var pos = q.poll();
+
+                    for (int i = 0; i < 4; i++) {
+                        var ny = pos.y + dy[i];
+                        var nx = pos.x + dx[i];
+
+                        if (ny < 0 || ny >= table.length || nx < 0 || nx >= table.length) {
+                            continue;
+                        }
+
+                        if (table[ny][nx] == 0 || table[ny][nx] != table[y][x]) {
+                            continue;
+                        }
+
+                        if (visited[ny][nx] == 1) {
+                            continue;
+                        }
+
+                        var nMapY = mapY + (ny - y);
+                        var nMapX = mapX + (nx - x);
+                        if (nMapY < 0 || nMapY >= table.length || nMapX < 0 || nMapX >= table.length
+                                || map[nMapY][nMapX] != map[mapY][mapX]) {
+                            q.clear();
+                            break;
+                        }
+
+                        visited[ny][nx] = 1;
+                        q.add(new Pos(ny, nx));
+                        tableBlockCount++;
+                    }
+                }
+
+                if (tableBlockCount == count) {
+                    tableBlockUsed[table[y][x]] = 1;
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
-    
-    public void bfs(int x, int y, int[][] board, boolean[][] visited, List<List<Point>> list){
-        
-        visited[x][y] = true;
-        
-        Queue<Point> q = new LinkedList<>();
-        q.add(new Point(x, y));
-        
-        List<Point> sub_list = new ArrayList<>();
-        sub_list.add(new Point(0, 0)); //(0,0) 기준으로 넣어줌
-        
-        while(!q.isEmpty()){
-            Point p = q.poll();
-            
-            for(int i=0; i<4; i++){
-                int nx = p.x + dx[i];
-                int ny = p.y + dy[i];
-                
-                if(nx<0 || ny<0 || nx>=board.length || ny>=board.length) continue;
-                
-                if(!visited[nx][ny] && board[nx][ny]==1){
-                    visited[nx][ny] = true;
-                    q.add(new Point(nx, ny));
-                    sub_list.add(new Point(nx-x, ny-y)); //(0, 0) 기준으로 넣기 때문에
-                }
-            }
-        }
-        
-        list.add(sub_list);
-    }
-    
-    static class Point implements Comparable<Point>{
-        int x, y;
-        Point(int x, int y){
-            this.x = x;
+
+    private static class Pos {
+        private int y;
+        private int x;
+
+        private Pos(int y, int x) {
             this.y = y;
-        }
-        
-        public int compareTo(Point o){
-            int res = Integer.compare(this.x, o.x);
-            if(res==0){
-                res = Integer.compare(this.y, o.y);
-            }
-            return res;
+            this.x = x;
         }
     }
 }
