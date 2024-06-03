@@ -1,56 +1,71 @@
 import java.util.*;
 
 class Solution {
-    static  Map<String, List<String>> map = new HashMap<>();
-    static  Map<String, List<String>> visite = new HashMap<>();
-    static int total =0;
-    static List<String> candidate = new ArrayList<>();
-    
-    public String[] solution(String[][] tickets) {
-        for (int i = 0; i < tickets.length; i++) {
-            map.putIfAbsent(tickets[i][0], new ArrayList<>());
-            List<String> temp = map.get(tickets[i][0]);
-            temp.add(tickets[i][1]);
-            
-            visite.putIfAbsent(tickets[i][0], new ArrayList<>());
-            List<String> temp1 = visite.get(tickets[i][0]);
-            temp1.add(tickets[i][1]);
-            
-            total++;
-        }
-        
-        String[] answer = new String[total+1];
+    List<Deque<String>> result;
+    String[][] tickets;
 
-        dfs("ICN", "ICN", 0);
-        
-        Collections.sort(candidate);
-        
-        String c = candidate.get(0);
-        int idx = 0;
-        for (int i =0; i < c.length(); i=i+3) {
-            answer[idx++] = c.substring(i, i+3);
+    public String[] solution(String[][] tickets) {
+        result = new ArrayList<>();
+        this.tickets = tickets;
+
+        boolean[] visited = new boolean[tickets.length];
+        Deque<String> dq = new ArrayDeque<>();
+        dq.push("ICN");
+
+        dfs(visited, dq, 0);
+
+        if (result.size() > 1) {
+            Collections.sort(result, new Comparator<Deque<String>>() {
+                @Override
+                public int compare(Deque<String> o1, Deque<String> o2) {
+                    Iterator<String> it1 = o1.iterator();
+                    Iterator<String> it2 = o2.iterator();
+                    while (it1.hasNext() && it2.hasNext()) {
+                        String s1 = it1.next();
+                        String s2 = it2.next();
+
+                        if (!s1.equals(s2)) {
+                            return s1.compareTo(s2);
+                        }
+                    }
+
+                    return 0;
+                }
+            });
         }
+
+        Deque<String> res = result.remove(0);
+        String[] answer = new String[res.size()];
+
+        int i = 0;
+        for (String s : res) {
+            answer[i++] = s;
+        }
+
         return answer;
     }
-    
-    public void dfs(String s, String root, int count) {
-        if (count == total) {
-            candidate.add(root);
+
+    public void dfs(boolean[] visited, Deque<String> dq, int len) {
+        if (len == tickets.length) {
+            Deque<String> res = new ArrayDeque<>(dq);
+            result.add(res);
             return;
-        } 
+        }
         
-        if(!map.containsKey(s) || visite.get(s).size() == 0) return;
-        
-        for(String n : map.get(s)) {
-            if (!visite.get(s).contains(n)) continue;
-            
-            visite.get(s).remove(n);
-            root += n;
-            
-            dfs(n, root, count+1);
-            
-            visite.get(s).add(n);
-            root = root.substring(0, root.length()-3);
+        String arrive = dq.peekLast();
+
+        for (int i = 0; i < tickets.length; i++) {
+            String[] tic = tickets[i];
+
+            if (!visited[i] && arrive.equals(tic[0])) {
+                dq.add(tic[1]);
+                visited[i] = true;
+
+                dfs(visited, dq, len + 1);
+
+                visited[i] = false;
+                dq.removeLast();
+            }
         }
     }
 }
