@@ -2,43 +2,38 @@ import java.util.*;
 
 class Solution {
     public int solution(int distance, int[] rocks, int n) {
+        int answer = 0;
         Arrays.sort(rocks);
-        int answer = binarySearch(distance,rocks,n);
+        
+        long l = 0, r = distance;
+        while (l <= r) {
+            long mid = (l+r) / 2;
+            int rmCnt = getResult(rocks, mid, distance);
+            
+            if (rmCnt > n) r = mid -1;
+            else if (rmCnt <= n) {
+                l = mid + 1;
+                answer = answer < (int) mid ? (int)mid : answer; 
+            }
+
+        }
+        
         return answer;
     }
-    private static final int MAX =  1_000_000_000;
-    private static int binarySearch(int distance, int[] rocks, int n){
-        int start = 0;
-        int end = MAX;
-        int result = 0;
-        while(start <= end){
-            int mid = (start + end) / 2;
-            if(cal(mid,distance,rocks,n)){
-                start = mid + 1;
-                result = mid;
-            }else{
-                end = mid - 1;
-            }
-        }
-        return result;
-    }
-    private static boolean cal(int mid, int distance , int[] rocks, int n){
+    
+    public int getResult(int[] rocks, long mid, int distance) {
         int prev = 0;
-        int cnt = 0;
-        for(int rock : rocks){
-            if(rock - prev < mid){
-                cnt++;
-            }else{
-                prev = rock;
-            }
+        int rmCnt = 0;
+        
+        for (int i = 0; i < rocks.length; i++) {
+            if (rocks[i] - prev < mid) rmCnt++;
+            else prev = rocks[i];
         }
-        if(distance - prev < mid){
-            cnt++;
+        
+        if (distance - prev < mid) {
+            rmCnt++;
         }
-        if(cnt <= n){
-            return true;
-        }else{
-            return false;
-        }
+        
+        return rmCnt;
     }
 }
