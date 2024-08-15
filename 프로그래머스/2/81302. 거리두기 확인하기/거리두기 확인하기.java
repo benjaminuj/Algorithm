@@ -1,130 +1,95 @@
 class Solution {
-    /* (C : 파티션 없을 경우 사람이 앉으면 안되는 위치, P : 검사할 사람 기준)
-      C
-     CCC
-    CCPCC
-     CCC
-      C
-    */
-    // 맨해튼 거리가 2이하인 방향 
-    int[][] dr = {{-2, 0}, {-1, -1}, {-1, 0}, {-1, 1}, {0, -2}, {0, -1}, {0, 1}, {0, 2}, {1, -1}, {1, 0}, {1, 1}, {2, 0}}; 
-    String[][] place;
+    static int[][] dr = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    
+    boolean done = false;
+    int result = 1;
     
     public int[] solution(String[][] places) {
+        boolean[][] visited = new boolean[5][5];
         int[] answer = new int[5];
         
-        
-        for (int t = 0; t < 5; t++) {
-            String[] now = places[t];
-            place = new String[5][5];
-            
-            for (int j = 0;  j < 5; j++) {
-                String line = now[j];
+        for (int i = 0; i < places.length; i++) {
+            for (int j = 0; j < places[i].length; j++) {
+                String line = places[i][j];
+                result = 1;
+                done = false;
                 
-                for (int i = 0; i < line.length(); i++) {
-                    place[j][i] = Character.toString(line.charAt(i));
+                for (int t = 0; t < line.length(); t++) {
+                    if (line.charAt(t) == 'P') {
+                        visited = new boolean[5][5];
+                        int[] origin = {j, t};
+                        
+                        dfs(j, t, 0, visited, places[i], origin);
+                        if (result == 0) break;
+                    }
                 }
+                answer[i] = result;
+                if (result == 0) break;
             }
-            
-            answer[t] = run(0, 0);
         }
         return answer;
     }
     
-    public int run(int r, int c) {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                if (place[i][j].equals("P")) {
-                    if (checkAround(i, j) == 0) {
-                        return 0;
+    public void dfs(int r, int c, int cnt, boolean[][] visited, String[] place, int[] origin) {
+        visited[r][c] = true; // !주의: dfs는 어떤 다른 작업전에 들어오자마자 방문 체크!!!
+        
+        if (cnt == 2) {
+            if (place[r].charAt(c) == 'P') {
+                int rDiff = Math.abs(origin[0] - r);
+                int cDiff = Math.abs(origin[1] - c);
+                
+                // 대각선 위치 
+                if (rDiff != 0 && cDiff != 0) {
+                    // System.out.println("origin r :" + origin[0] + ", c :" + origin[1]);
+                    // System.out.println("r: " + r + ", c:" + c);
+                    // boolean ch = place[r].charAt(origin[1]) != 'X';
+                    // System.out.println("place[r].charAt(origin[1]) : " + place[r].charAt(origin[1]));
+                    // System.out.println("place[r].charAt(origin[1]) != 'X' : " + ch );
+                    if ((place[origin[0]].charAt(c) != 'X') || (place[r].charAt(origin[1]) != 'X')) {
+                        result = 0;
+                    }
+                } else { // 직선거리에 위치 
+                    if (rDiff != 0) {
+                        if (r > origin[0]) {
+                            if (place[r-1].charAt(c) != 'X') result = 0;
+                        } else {
+                            if (place[r+1].charAt(c) != 'X') result = 0;
+                        }
+                    } 
+                    
+                    if (cDiff != 0) {
+                        if (c > origin[1]) {
+                            if (place[r].charAt(c-1) != 'X') result = 0;
+                        } else {
+                            if (place[r].charAt(c+1) != 'X') result = 0;
+                        }
                     }
                 }
             }
+            return;
         }
         
-        return 1;
-    }
-    
-    public int checkAround(int r, int c) {
-        for (int[] d : dr) {
-            int nR = r + d[0];
-            int nC = c + d[1];
-            
-            if (inRange(nR, nC) && place[nR][nC].equals("P")) {
-                if (getManhattan(r, c, nR, nC) == 1) { // 응시자가 옆에 딱 붙어있는 경우 
-                    return 0;
-                } else { // 파티션 체크 필요 
-                    if (r == nR && c != nC) { // 같은 행에서 맨해튼 거리가 2인 경우
-                        if (c < nC) {
-                            if (place[r][c+1].equals("X"))  { // 사이에 파티션 있는 경우
-                                continue;
-                            } else {
-                                return 0;
-                            }
-                        } else {
-                            if (place[r][c-1].equals("X")) { // 사이에 파티션 있는 경우
-                                continue;
-                            } else {
-                                return 0;
-                            }
-                        }
-                    } else if (c == nC && r != nR) { // 같은 열에서 맨해튼 거리가 2인 경우 
-                        if (r < nR) {
-                            if (place[r+1][c].equals("X")) {
-                                continue;
-                            } else {
-                                return 0;
-                            }
-                        } else {
-                            if (place[r-1][c].equals("X")) {
-                                continue;
-                            } else {
-                                return 0;
-                            }
-                        }
-                    } else { // 대각선에 있는 경우 
-                        if (r < nR) {
-                            if (c < nC) { // 위치 11
-                                if (place[r+1][c].equals("X") && place[r][c+1].equals("X")) {
-                                    continue;
-                                } else {
-                                    return 0;
-                                }
-                            } else { // 위치 9
-                                if (place[r+1][c].equals("X") && place[r][c-1].equals("X")) {
-                                    continue;
-                                } else {
-                                    return 0;
-                                }
-                            }
-                        } else {
-                            if (c < nC) { // 위치 4
-                                if (place[r-1][c].equals("X") && place[r][c+1].equals("X")) {
-                                    continue;
-                                } else {
-                                    return 0;
-                                }
-                            } else { // 위치 2
-                                if (place[r-1][c].equals("X") && place[r][c-1].equals("X")) {
-                                    continue;
-                                } else {
-                                    return 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if (cnt == 1 && place[r].charAt(c) == 'P') {
+            done = true;
+            result = 0;
+            return;
         }
-        return 1;
+        
+        
+        for (int[] d : dr) {
+            int nr = r + d[0];
+            int nc = c + d[1];
+            
+            if (isRange(nr, nc) && !visited[nr][nc]) {
+                dfs(nr, nc, cnt + 1, visited, place, origin);
+            }
+            
+            if (done) return;
+        }
     }
-    
-    public int getManhattan(int r, int c, int nR, int nC) {
-        return Math.abs(r-nR) + Math.abs(c - nC);
-    }
+        
+    public boolean isRange(int r, int c) {
+        return r >= 0 && c >= 0 && r < 5 && c < 5; 
 
-    
-    public boolean inRange(int r, int c) {
-        return r >= 0 && c >= 0 && r < 5 && c < 5;
     }
 }
