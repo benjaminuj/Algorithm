@@ -1,44 +1,40 @@
-import java.util.*;
-
 class Solution {
-    int maxSheep = 0;
     public int solution(int[] info, int[][] edges) {
-        Map<Integer, List<Integer>> graph = new HashMap<>();
-        for (int[] edge : edges) {
-            graph.putIfAbsent(edge[0], new ArrayList<>());
-            graph.get(edge[0]).add(edge[1]);
-        }
+        int answer = 1;
         
         boolean[] visited = new boolean[info.length];
         visited[0] = true;
-        search(info, graph, 0, 0,0, visited);
+
+        return dfs(info, edges, visited, 1, 0);
         
-        return maxSheep;
+        
     }
     
-    void search(int[] info, Map<Integer, List<Integer>> graph, int index, int sheep, int wolf, boolean[] visited) {
-        if (info[index] == 0) {
-            maxSheep = Math.max(maxSheep, ++sheep);
-        } else {
-            if(wolf + 1 >= sheep) {
-                return;
-            } else {
-                wolf += 1;
+    int dfs(int[] info, int[][] edges, boolean[] visited, int sheep, int wolf) {
+        //✅ 방문표시를 여기서 하지않는다!!
+        if (sheep == wolf) return sheep;
+        int maxSheep = sheep;
+        
+        //✅ 모든 edge를 확인한다.
+        for (int[] edge : edges) {
+            final int parent = edge[0];
+            final int child = edge[1];
+            
+            if (visited[parent] && !visited[child]) {
+                //✅ 다음 노드를 방문표시한다.
+                visited[child] = true;
+                
+                if (info[child] == 0) {
+                    maxSheep = Math.max(maxSheep, dfs(info, edges, visited, sheep + 1, wolf));
+                
+                } else {
+                    maxSheep = Math.max(maxSheep, dfs(info, edges, visited, sheep, wolf + 1));
+                }
+                //✅ 다음 노드를 방문표시 해제한다.
+                visited[child] = false;
             }
         }
         
-        for (int i =0 ; i < visited.length; i++) {
-            if (visited[i]) {
-                if(graph.containsKey(i)) {
-                    for (int next: graph.get(i)) {
-                        if(!visited[next]) {
-                            visited[next] = true;
-                            search(info, graph, next, sheep, wolf, visited);
-                            visited[next] = false;
-                        }
-                    }
-                }
-            }
-        }
+        return maxSheep;
     }
 }
