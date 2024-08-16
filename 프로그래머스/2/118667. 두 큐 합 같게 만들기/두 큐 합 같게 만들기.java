@@ -1,37 +1,51 @@
+import java.util.*;
+
 class Solution {
     public int solution(int[] queue1, int[] queue2) {
         int answer = 0;
-        int n = queue1.length + queue2.length;
-        int[] a = new int[n];
-        long total = 0;
-        long sum = 0;
-        for (int i =0 ; i < queue1.length; i++) {
-            a[i] = queue1[i];
-            total += queue1[i];
+        long sumQ1 = 0L;
+        long sumQ2 = 0L;
+        
+        List<Integer> all = new ArrayList<>();
+        all.addAll(Arrays.asList(
+            Arrays.stream(queue1).boxed().toArray(Integer[]::new)));
+        all.addAll(Arrays.asList(Arrays.stream(queue2).boxed().toArray(Integer[]::new)));
+        Integer[] allArr = all.toArray(new Integer[all.size()]);
+        
+        for (int i : queue1) {
+            sumQ1 += i;
         }
-        sum = total;
-        
-        for (int j =0 ; j < queue2.length; j++) {
-            a[queue1.length + j] = queue2[j];
-            total += queue2[j];
+        for (int i : queue2) {
+            sumQ2 += i;
         }
         
-        if (total % 2 != 0) return -1;
+        long half = (sumQ1 + sumQ2)/2L;
         
-        int s = 0, e = queue1.length;
-        while (answer < 2*n) {
-            if (sum < total/2) {
-                sum += a[e];
-                e = (e+1) % n;
+        if ((sumQ1 + sumQ2) % 2 != 0) return -1; // !!홀수일 경우 예외처리!!
+        
+        int s = 0, e = queue1.length-1;
+        int originS = s, originE = e;
+        while (true) {
+            if (sumQ1 < half) {
+                e = (e+1) % allArr.length;
+                
+                sumQ1 += allArr[e];
+                
                 answer++;
-            } else if (sum > total/2){
-                sum -= a[s];
-                s = (s+1) % n;
+            } else if (sumQ1 > half) {
+                sumQ1 -= allArr[s];
+                
+                s = (s+1) % allArr.length; // !!빼는건 각 합을 계산한 후, 포인터 이동! 순서 주의!!!
+                
                 answer++;
-            } else {
-                return answer;
             }
+            
+            // 이전에 했던 상황 중복. 더 이상 탐색 의미없음
+            if (answer > allArr.length*2) break;
+            
+            if (sumQ1 == half) return answer;
         }
+        
         return -1;
     }
 }
