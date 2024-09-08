@@ -30,24 +30,6 @@ class Solution {
         for (int n : onlyOut) {
             tempNode = out[tempNode] < out[n] ? n : tempNode;
         }
-        // // out만 있는 노드가 1개: 해당 노드가 임의의 정점
-        // if (onlyOut.size() == 1) {
-        //     tempNode = onlyOut.get(0);
-        // } 
-        // // out만 있는 노드가 2개 이상: in이 있는 노드한테 뻗은 노드(out만 있는 노드)가 임의의 정점
-        // if (onlyOut.size() > 1) {
-        //     outer:
-        //     for (int node : onlyOut) {
-        //         for (int next : graph[node]) {
-        //             if (in[next] != 0) {
-        //                 tempNode = node;
-        //                 break outer;
-        //             }
-        //         }
-        //     }
-        // }
-        
-        answer[0] = tempNode;
         
         int eight = 0;
         int doughnut = 0;
@@ -67,10 +49,10 @@ class Solution {
             } 
         }
         
+        answer[0] = tempNode;
         answer[1] = doughnut;
         answer[2] = rod;
         answer[3] = eight;
-
         return answer;
     }
     
