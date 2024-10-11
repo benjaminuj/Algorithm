@@ -5,7 +5,6 @@ class Solution {
     Map<String, List<Integer>> allCases = new HashMap<>(); // 가능한 모든 조합, {가능한 모든 수의 합}
     Map<String, String> pair = new HashMap<>(); // 대진짝
     int maxWin = -1;
-    Set<String> visited = new HashSet<>();
     String candidate;
     
     public int[] solution(int[][] dice) {
@@ -28,15 +27,13 @@ class Solution {
         for (String me : allCases.keySet()) {
             if (me.length() != n/2) continue;
             
-            if (visited.contains(me)) continue;
-            
             List<Integer> meList = allCases.get(me);
             List<Integer> opList = allCases.get(pair.get(me));
             
             int meWinCnt = 0;
             int opWinCnt = 0;
             
-            // optimization**
+            // optimization!! 정렬 후 누적합을 사용해서 O(N)으로 처리하기
             Collections.sort(meList);
             Collections.sort(opList);
             
@@ -72,7 +69,6 @@ class Solution {
                 maxWin = winCnt;
                 candidate = me;
             }
-            visited.add(me);
         }
     }
     
@@ -106,7 +102,7 @@ class Solution {
         }
         
         for (int i = sIdx; i < n; i++) {
-            idxs.append(i); // int 넣어도 되네
+            idxs.append(i);
             combi(idxs, i+1, dice);
             idxs.deleteCharAt(idxs.length()-1);
         }
