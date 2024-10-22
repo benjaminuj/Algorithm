@@ -1,90 +1,85 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
-import java.util.StringTokenizer;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
-public static int[][] list;
-public static PriorityQueue<Integer>[] distQueue;
-public static int k,n;
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		n =  Integer.parseInt(st.nextToken());
-		int m =  Integer.parseInt(st.nextToken());
-		k =  Integer.parseInt(st.nextToken());
-		distQueue = new PriorityQueue[n+1];
-		Comparator<Integer> cp = new Comparator<Integer>() {
-			@Override
-			public int compare(Integer o1, Integer o2) {
-				return o1<o2 ? 1 : -1;
-			}
-		};
-		for(int i=1; i<n+1; i++) {
-			distQueue[i] = new PriorityQueue<Integer>(k,cp);
+	static int n,m,k;
+	static List<City>[] list;
+	static Queue<Integer>[] dis;
+	static class City implements Comparable<City>{
+		int t;
+		int w;
+		
+		public City(int t, int w) {
+			this.t = t;
+			this.w = w;
 		}
-		list = new int[n+1][n+1];
+
+		@Override
+		public int compareTo(City o) {
+			return this.w - o.w;
+		}
+	}
+	public static void main(String[] args) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		n = Integer.parseInt(st.nextToken());
+		m = Integer.parseInt(st.nextToken());
+		k = Integer.parseInt(st.nextToken());
+		
+		dis = new PriorityQueue[n+1];
+		list = new ArrayList[n+1];
+		for(int i=1; i<n+1; i++) {
+			dis[i] = new PriorityQueue<>(Collections.reverseOrder());// 최대 힙 (내림차순)  
+			list[i] = new ArrayList<>();
+		}
 		for(int i=0; i<m; i++) {
 			st = new StringTokenizer(br.readLine());
-			int a = Integer.parseInt(st.nextToken());
-			int b = Integer.parseInt(st.nextToken());
-			int c = Integer.parseInt(st.nextToken());
-			list[a][b] = c;
+			int f = Integer.parseInt(st.nextToken());
+			int t = Integer.parseInt(st.nextToken());
+			int w = Integer.parseInt(st.nextToken());
+			
+			list[f].add(new City(t,w));
 		}
-		dijkstra(list, distQueue);
-		for(int i=1; i<n+1; i++) {
-			if(distQueue[i].size() == k) bw.write(distQueue[i].peek() + "\n");
-			else bw.write("-1" + "\n");
+		
+		solve(1);
+		 for (int i = 1; i < n+1; ++i){
+			if (dis[i].size() == k) System.out.println(dis[i].peek());
+			else System.out.println(-1);
 		}
-		bw.flush();
-		bw.close();
-		br.close();
 	}
 	
-	public static void dijkstra(int[][] list,PriorityQueue<Integer>[] distQueue) {
-		PriorityQueue<kNode> pq = new PriorityQueue<>();
-		pq.offer(new kNode(1,0));
-		distQueue[1].add(0);
-		while(!pq.isEmpty()) {
-			kNode now = pq.poll();
-			for(int i=1; i<n+1; i++) {
-				if(list[now.node][i] != 0) {
-					if(distQueue[i].size() < k) {
-						distQueue[i].offer(now.time + list[now.node][i]);
-						pq.offer(new kNode(i, now.time + list[now.node][i]));
-					} else {
-						if(distQueue[i].peek() > now.time + list[now.node][i]) {
-							distQueue[i].poll();
-							distQueue[i].add(now.time + list[now.node][i]);
-							pq.add(new kNode(i, now.time + list[now.node][i]));
-						}
-					}
+	static void solve(int start) {
+		Queue<City> q = new PriorityQueue<>();
+		q.add(new City(start,0));
+		dis[start].add(0); //i → i 1번째 최단경로는 0
+
+		while(!q.isEmpty()) {
+			City pos= q.poll();
+			int to = pos.t;
+			int weight = pos.w;
+			
+			for(City nxt : list[to]) {
+				//k개 최단경로 저장  
+				if(dis[nxt.t].size()<k) {
+					dis[nxt.t].add((weight+nxt.w));
+					
+					q.add(new City(nxt.t, weight+nxt.w));
+					
+				}
+				// dis[nxt.t].size() == k이고,
+				// k번째 최단경로(dis[nxt.to].peek())보다 현재 경로(weight+nxt.w)가 더 작으면 최단경로 갱신
+				else if(dis[nxt.t].peek() > weight+nxt.w) { 
+					dis[nxt.t].poll();
+					dis[nxt.t].add(weight +nxt.w);
+					
+					q.add(new City(nxt.t, weight + nxt.w));
 				}
 			}
 		}
 	}
-
-}
-
-class kNode implements Comparable<kNode>{
-	int node;
-	int time;
-	
-	kNode(int targetNode, int time) {
-		this.node = targetNode;
-		this.time = time;
-	}
-	
-	@Override
-	public int compareTo(kNode n) {
-		if(this.time> n.time) return 1;
-		else return -1;
-	}
-	
 }
