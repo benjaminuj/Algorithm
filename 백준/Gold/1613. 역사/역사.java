@@ -41,25 +41,16 @@ public class Main {
 	     for (int i = 0; i < s; i++) {
     	 	String[] temp = br.readLine().split(" ");
 	    	 
-	    	 int a = Integer.parseInt(temp[0]);
-	    	 int b = Integer.parseInt(temp[1]);
-	    	 a--;
-	    	 b--;
+	    	 int a = Integer.parseInt(temp[0])-1;
+	    	 int b = Integer.parseInt(temp[1])-1;
 	    	 
-	    	 boolean know = false;
-	    	 for (int mid = 0; mid < n; mid++) {
-	    		 if (graph[a][b] == 1) {
-	    			 System.out.println(-1);
-	    			 know = true;
-	    			 break;
-	    		 }
-	    		 if (graph[b][a] == 1) {
-	    			 System.out.println(1);
-	    			 know = true;
-	    			 break;
-	    		 }
-	    	 }
-	    	 if (!know) System.out.println(0);
+    		 if (graph[a][b] == 1) {
+    			 System.out.println(-1);
+    		 } else if (graph[b][a] == 1) {
+    			 System.out.println(1);
+    		 } else {
+    			 System.out.println(0);
+    		 }
 	     }
 	 }
 }
