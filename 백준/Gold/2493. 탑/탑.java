@@ -34,7 +34,6 @@ public class Main {
 			 
 			 stack.push(new Info(cur, i+1));
 	     }
-		 stack = null;
 		 answer.deleteCharAt(0);
 		 
 		 System.out.print(answer.toString());
